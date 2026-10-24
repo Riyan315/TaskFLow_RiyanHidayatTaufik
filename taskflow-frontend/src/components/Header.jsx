@@ -1,19 +1,34 @@
 const NAV_ITEMS = [
-  { href: '#ringkasan', label: 'Ringkasan' },
-  { href: '#tambah', label: 'Tambah tugas' },
-  { href: '#daftar', label: 'Daftar tugas' },
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'kalender', label: 'Kalender' },
+  { id: 'selesai', label: 'Tugas Selesai' },
 ]
 
-function Header() {
+function Header({ view, onNavigate }) {
   return (
     <header className="header">
-      <a className="header__brand" href="#main">TaskFlow</a>
+      <button
+        type="button"
+        className="header__brand"
+        onClick={() => onNavigate('dashboard')}
+      >
+        TaskFlow
+      </button>
       <nav className="header__nav" aria-label="Navigasi utama">
-        {NAV_ITEMS.map((item) => (
-          <a key={item.href} className="header__link" href={item.href}>
-            {item.label}
-          </a>
-        ))}
+        {NAV_ITEMS.map((item) => {
+          const isActive = view === item.id
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={`header__link ${isActive ? 'header__link--active' : ''}`}
+              aria-current={isActive ? 'page' : undefined}
+              onClick={() => onNavigate(item.id)}
+            >
+              {item.label}
+            </button>
+          )
+        })}
       </nav>
     </header>
   )

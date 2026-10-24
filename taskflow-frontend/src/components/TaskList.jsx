@@ -3,7 +3,7 @@ import EmptyState from './EmptyState'
 
 function TaskList({
   tasks,
-  onToggleTask,
+  onUpdateStatus,
   onEditTask,
   onDeleteTask,
   editingId,
@@ -28,7 +28,7 @@ function TaskList({
           key={task.id}
           task={task}
           isEditing={task.id === editingId}
-          onToggle={onToggleTask}
+          onUpdateStatus={onUpdateStatus}
           onEdit={onEditTask}
           onDelete={onDeleteTask}
         />

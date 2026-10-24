@@ -35,6 +35,16 @@ function PencilIcon() {
   )
 }
 
+function UndoIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 10h9a5 5 0 0 1 0 10H8" />
+      <path d="M8 6l-4 4 4 4" />
+    </svg>
+  )
+}
+
 function TrashIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -44,7 +54,7 @@ function TrashIcon() {
   )
 }
 
-function TaskCard({ task, onToggle, onEdit, onDelete, isEditing }) {
+function TaskCard({ task, onUpdateStatus, onEdit, onDelete, isEditing }) {
   const { id, title, course, deadline, priority, completed } = task
   const [confirming, setConfirming] = useState(false)
   const confirmRef = useRef(null)
@@ -96,6 +106,17 @@ function TaskCard({ task, onToggle, onEdit, onDelete, isEditing }) {
             </div>
           ) : (
             <>
+              {completed && (
+                <button
+                  type="button"
+                  className="text-btn"
+                  onClick={() => onUpdateStatus(id, false)}
+                  aria-label={`Aktifkan kembali ${title}`}
+                >
+                  <UndoIcon />
+                  Aktifkan kembali
+                </button>
+              )}
               <button
                 type="button"
                 className="text-btn"
@@ -123,20 +144,22 @@ function TaskCard({ task, onToggle, onEdit, onDelete, isEditing }) {
         <span className={`badge ${PRIORITY_CLASS[priority] ?? 'badge--medium'}`}>
           Prioritas {priority}
         </span>
-        <button
-          type="button"
-          className={`status-btn ${completed ? 'status-btn--done' : ''}`}
-          onClick={() => onToggle(id)}
-          aria-pressed={completed}
-          aria-label={
-            completed
-              ? `Tandai ${title} belum selesai`
-              : `Tandai ${title} selesai`
-          }
-        >
-          {completed ? <CheckIcon /> : <CircleIcon />}
-          <span>{completed ? 'Selesai' : 'Belum selesai'}</span>
-        </button>
+        {completed ? (
+          <span className="status-chip">
+            <CheckIcon />
+            <span>Selesai</span>
+          </span>
+        ) : (
+          <button
+            type="button"
+            className="status-btn"
+            onClick={() => onUpdateStatus(id, true)}
+            aria-label={`Tandai ${title} selesai`}
+          >
+            <CircleIcon />
+            <span>Tandai selesai</span>
+          </button>
+        )}
       </div>
     </li>
   )
