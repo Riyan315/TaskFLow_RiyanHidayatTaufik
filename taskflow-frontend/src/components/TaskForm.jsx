@@ -1,17 +1,46 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const PRIORITIES = ['Rendah', 'Sedang', 'Tinggi']
 
-const INITIAL_FORM = {
+const EMPTY_FORM = {
   title: '',
   course: '',
   deadline: '',
   priority: 'Sedang',
 }
 
-function TaskForm({ onAddTask }) {
-  const [form, setForm] = useState(INITIAL_FORM)
+function toFormValues(task) {
+  if (!task) return EMPTY_FORM
+  return {
+    title: task.title,
+    course: task.course,
+    deadline: task.deadline,
+    priority: task.priority,
+  }
+}
+
+function TaskForm({ initialTask, onSubmit, onCancel }) {
+  const isEditing = Boolean(initialTask)
+  const [form, setForm] = useState(() => toFormValues(initialTask))
   const [errors, setErrors] = useState({})
+
+  const formRef = useRef(null)
+  const titleRef = useRef(null)
+  const courseRef = useRef(null)
+  const deadlineRef = useRef(null)
+
+  // Saat masuk mode edit, bawa pengguna ke form dan langsung siap mengetik.
+  useEffect(() => {
+    if (!isEditing) return
+    const prefersReducedMotion = window.matchMedia?.(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
+    formRef.current?.scrollIntoView({
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      block: 'center',
+    })
+    titleRef.current?.focus({ preventScroll: true })
+  }, [isEditing])
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -34,25 +63,38 @@ function TaskForm({ onAddTask }) {
     event.preventDefault()
     const nextErrors = validate()
     setErrors(nextErrors)
-    if (Object.keys(nextErrors).length > 0) return
 
-    onAddTask({
+    const firstInvalid = ['title', 'course', 'deadline'].find(
+      (field) => nextErrors[field],
+    )
+    if (firstInvalid) {
+      const refs = {
+        title: titleRef,
+        course: courseRef,
+        deadline: deadlineRef,
+      }
+      refs[firstInvalid].current?.focus()
+      return
+    }
+
+    onSubmit({
       title: form.title.trim(),
       course: form.course.trim(),
       deadline: form.deadline,
       priority: form.priority,
     })
-    setForm(INITIAL_FORM)
+    if (!isEditing) setForm(EMPTY_FORM)
   }
 
   return (
-    <form className="task-form" onSubmit={handleSubmit} noValidate>
+    <form className="task-form" onSubmit={handleSubmit} noValidate ref={formRef}>
       <div className="field">
         <label htmlFor="title">Judul tugas</label>
         <input
           id="title"
           name="title"
           type="text"
+          ref={titleRef}
           value={form.title}
           onChange={handleChange}
           placeholder="Contoh: Laporan praktikum React"
@@ -68,6 +110,7 @@ function TaskForm({ onAddTask }) {
           id="course"
           name="course"
           type="text"
+          ref={courseRef}
           value={form.course}
           onChange={handleChange}
           placeholder="Contoh: Pemrograman Web"
@@ -83,6 +126,7 @@ function TaskForm({ onAddTask }) {
           id="deadline"
           name="deadline"
           type="date"
+          ref={deadlineRef}
           value={form.deadline}
           onChange={handleChange}
           aria-invalid={Boolean(errors.deadline)}
@@ -100,7 +144,16 @@ function TaskForm({ onAddTask }) {
         </select>
       </div>
 
-      <button type="submit" className="btn btn--primary">Tambah tugas</button>
+      <div className="task-form__actions">
+        <button type="submit" className="btn btn--primary">
+          {isEditing ? 'Simpan perubahan' : 'Tambah tugas'}
+        </button>
+        {isEditing && (
+          <button type="button" className="btn btn--ghost" onClick={onCancel}>
+            Batal
+          </button>
+        )}
+      </div>
     </form>
   )
 }

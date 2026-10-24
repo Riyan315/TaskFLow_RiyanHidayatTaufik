@@ -1,4 +1,7 @@
-function EmptyState() {
+function EmptyState({
+  title = 'Belum ada data tugas.',
+  text = 'Isi formulir untuk menambahkan tugas pertama kamu.',
+}) {
   return (
     <div className="empty-state">
       <svg
@@ -16,10 +19,8 @@ function EmptyState() {
         <rect x="4" y="3" width="16" height="18" rx="2" />
         <path d="M8 8h8M8 12h8M8 16h4" />
       </svg>
-      <p className="empty-state__title">Belum ada data tugas.</p>
-      <p className="empty-state__text">
-        Isi formulir di samping untuk menambahkan tugas pertama kamu.
-      </p>
+      <p className="empty-state__title">{title}</p>
+      <p className="empty-state__text">{text}</p>
     </div>
   )
 }
